@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Connexion vendeur · AfricaShop</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:380px;margin:3rem auto;padding:0 1rem}
+input,button{width:100%;padding:.7rem;margin:.4rem 0;font-size:1rem;box-sizing:border-box}
+button{background:#0b5cad;color:#fff;border:0;border-radius:6px;cursor:pointer}
+#msg{color:#b00020;min-height:1.4rem}
+</style></head><body>
+<h1>Espace vendeur</h1>
+<input id="email" type="email" placeholder="E-mail" autocomplete="username">
+<input id="pwd" type="password" placeholder="Mot de passe" autocomplete="current-password">
+<button id="go">Se connecter</button>
+<p id="msg"></p>
+<script>
+var CLIENT_ID = "7igrcdbp9bf2t2ieej519slk0o";
+var REGION = "us-east-1";
+document.getElementById("go").onclick = async function () {
+  var msg = document.getElementById("msg");
+  msg.textContent = "";
+  try {
+    var r = await fetch("https://cognito-idp." + REGION + ".amazonaws.com/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-amz-json-1.1",
+        "X-Amz-Target": "AWSCognitoIdentityProviderService.InitiateAuth"
+      },
+      body: JSON.stringify({
+        AuthFlow: "USER_PASSWORD_AUTH",
+        ClientId: CLIENT_ID,
+        AuthParameters: {
+          USERNAME: document.getElementById("email").value,
+          PASSWORD: document.getElementById("pwd").value
+        }
+      })
+    });
+    var d = await r.json();
+    if (!d.AuthenticationResult) { msg.textContent = "Identifiants incorrects."; return; }
+    sessionStorage.setItem("africashop.token", d.AuthenticationResult.AccessToken);
+    location.href = "vendeur.html";
+  } catch (e) { msg.textContent = "Connexion impossible."; }
+};
+</script></body></html>
